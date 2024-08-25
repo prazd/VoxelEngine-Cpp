@@ -15,16 +15,21 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     gdb \
     gdbserver \
     libglfw3-dev \
+    pkg-config \
     libglfw3 \
     libglew-dev \
     libglm-dev \
     libpng-dev \
     libopenal-dev \
     libluajit-5.1-dev \
+    libpthread-stubs0-dev \
     libvorbis-dev \
     ca-certificates \
+    mesa-utils \
     && rm -rf /var/lib/apt/lists/*
 
+
+    
 # Install EnTT
 RUN git clone https://github.com/skypjack/entt.git && \
     cd entt/build && \
@@ -54,3 +59,4 @@ USER ${UID}:${GID}
 
 # Project workspace
 WORKDIR /project
+COPY . /project

@@ -91,8 +91,9 @@ uint WorldRegion::getChunkDataSize(uint x, uint z) {
 }
 
 WorldRegions::WorldRegions(const fs::path& directory) : directory(directory) {
-    for (size_t i = 0; i < sizeof(layers) / sizeof(RegionsLayer); i++) {
-        layers[i].layer = i;
+    for (int i = 0; i < 4; i++) {
+        layers[i] = RegionsLayer();
+        layers[i].layer = static_cast<int>(i);
     }
     layers[REGION_LAYER_VOXELS].folder = directory / fs::path("regions");
     layers[REGION_LAYER_LIGHTS].folder = directory / fs::path("lights");
@@ -105,7 +106,8 @@ WorldRegions::~WorldRegions() = default;
 
 WorldRegion* WorldRegions::getRegion(int x, int z, int layer) {
     RegionsLayer& regions = layers[layer];
-    std::lock_guard lock(regions.mutex);
+//    std::lock_guard lock(regions.mutex);
+    std::lock_guard lock(regions.get_mutex());
     auto found = regions.regions.find(glm::ivec2(x, z));
     if (found == regions.regions.end()) {
         return nullptr;
@@ -118,7 +120,8 @@ WorldRegion* WorldRegions::getOrCreateRegion(int x, int z, int layer) {
         return region;
     }
     RegionsLayer& regions = layers[layer];
-    std::lock_guard lock(regions.mutex);
+//    std::lock_guard lock(regions.mutex);
+    std::lock_guard lock(regions.get_mutex());
     auto region_ptr = std::make_unique<WorldRegion>();
     auto region = region_ptr.get();
     regions.regions[{x, z}] = std::move(region_ptr);

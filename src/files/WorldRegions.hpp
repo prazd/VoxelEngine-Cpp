@@ -76,7 +76,15 @@ struct RegionsLayer {
     int layer;
     fs::path folder;
     regionsmap regions;
-    std::mutex mutex;
+    std::unique_ptr<std::mutex> mutex;
+    RegionsLayer() : mutex(std::make_unique<std::mutex>()) {}
+    RegionsLayer(const RegionsLayer&) = delete;
+    RegionsLayer& operator=(const RegionsLayer&) = delete;
+    RegionsLayer(RegionsLayer&&) noexcept = default;
+    RegionsLayer& operator=(RegionsLayer&&) noexcept = default;
+    std::mutex& get_mutex() {
+        return *mutex;
+    }
 };
 
 class regfile_ptr {

@@ -10,10 +10,31 @@ option(VOXELENGINE_BUILD_APPDIR OFF)
 option(VOXELENGINE_BUILD_TESTS OFF)
 
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_PREFIX_PATH "/usr/local/opt/luajit" ${CMAKE_PREFIX_PATH})
+include_directories(/usr/local/Cellar/lua/5.4.7/include)
+set(LUAJIT_DIR "/usr/local/opt/luajit")
+include_directories(${LUAJIT_DIR}/include/luajit-2.1)
+link_directories(${LUAJIT_DIR}/lib)
+set(LUAJIT_LIBRARIES "/usr/local/opt/luajit/lib/libluajit-5.1.a" CACHE STRING "LuaJIT library")
+set(LUAJIT_INCLUDE_DIR "/usr/local/opt/luajit/include/luajit-2.1" CACHE STRING "LuaJIT include dir")
+
+include_directories(${LUAJIT_INCLUDE_DIR})
+link_directories(${LUAJIT_LIBRARIES})
+
+
 
 add_subdirectory(src)
 add_executable(${PROJECT_NAME} src/voxel_engine.cpp)
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+
+
+find_library(LUAJIT_LIBRARIES NAMES luajit-5.1 PATHS ${LUAJIT_DIR}/lib NO_DEFAULT_PATH)
+if(NOT LUAJIT_LIBRARIES)
+  message(FATAL_ERROR "Could not find LuaJIT library")
+endif()
+
+target_link_libraries(${PROJECT_NAME} ${LUAJIT_LIBRARIES})
 
 if(VOXELENGINE_BUILD_APPDIR)
     include(${CMAKE_CURRENT_SOURCE_DIR}/dev/cmake/BuildAppdir.cmake)
@@ -35,7 +56,7 @@ else()
     # additional warnings
     -Wformat-nonliteral -Wcast-align
     -Wpointer-arith -Wundef
-    -Wwrite-strings -Wno-unused-parameter)
+    -Wwrite-strings -Wno-unused-parameter -Wno-attributes)
   if (CMAKE_BUILD_TYPE MATCHES "Debug")
     target_compile_options(${PROJECT_NAME} PRIVATE -Og)
   endif()
